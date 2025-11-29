@@ -35,6 +35,15 @@ const Game = () => {
     }
   }, [players, room]);
 
+  useEffect(() => {
+    if (room?.status === RoomStatus.FINISHED) {
+      supabase
+        .from('rooms')
+        .delete()
+        .eq('id', room.id)
+    }
+  }, [room?.status, room?.id]);
+
   const currentPhrase = room?.phrases[room.current_phrase_index || 0];
   const activePlayers = players.filter(p => !p.is_eliminated);
 
@@ -232,6 +241,29 @@ const Game = () => {
         <div className="text-center py-2 bg-muted rounded-lg">
           <p className="text-lg font-semibold">Jugando como: {currentPlayer.name}</p>
         </div>
+        {isHost && (
+          <div className="inline-block align-middle">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="inline-flex items-center h-8 px-3 text-sm"
+              onClick={async () => {
+                if (!room) return;
+                await supabase
+                  .from('rooms')
+                  .update({ status: RoomStatus.FINISHED })
+                  .eq('id', room.id);
+                toast({
+                  title: 'Juego terminado',
+                  description: 'La sala ha sido marcada como finalizada',
+                });
+              }}
+            >
+              <Trophy className="mr-2 h-4 w-4" />
+              Terminar Juego
+            </Button>
+          </div>
+        )}
         {!voting ? (
           <>
             <Card className={`p-12 text-center ${isImpostor ? 'gradient-impostor border-2 border-destructive' : 'gradient-primary border-2 border-primary'}`}>
