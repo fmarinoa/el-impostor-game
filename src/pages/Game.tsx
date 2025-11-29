@@ -136,7 +136,10 @@ const Game = () => {
             title: '¡El impostor ha ganado!',
             description: 'Solo quedaban 2 jugadores',
           });
-          nextPhrase();
+          await supabase
+            .from('rooms')
+            .update({ status: RoomStatus.FINISHED })
+            .eq('id', room.id);
         } else {
           setVoting(false);
           setHasVoted(false);
@@ -204,6 +207,19 @@ const Game = () => {
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
         <Card className="p-8 text-center">
           <p className="text-lg mb-4">Error al cargar el juego</p>
+          <Button onClick={() => navigate('/')}>Volver al inicio</Button>
+        </Card>
+      </div>
+    );
+  }
+
+  if (room.status === RoomStatus.FINISHED) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
+        <Card className="p-8 text-center">
+          <Trophy className="h-16 w-16 text-primary mx-auto mb-4" />
+          <h2 className="text-2xl font-bold mb-4">Juego Terminado</h2>
+          <p className="text-muted-foreground mb-6">Gracias por jugar</p>
           <Button onClick={() => navigate('/')}>Volver al inicio</Button>
         </Card>
       </div>
