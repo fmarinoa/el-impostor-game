@@ -61,12 +61,16 @@ ALTER PUBLICATION supabase_realtime ADD TABLE public.votes;
 
 -- Función para actualizar updated_at
 CREATE OR REPLACE FUNCTION public.update_updated_at_column()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER 
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 BEGIN
   NEW.updated_at = now();
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 -- Trigger para actualizar updated_at en rooms
 CREATE TRIGGER update_rooms_updated_at
