@@ -213,6 +213,9 @@ const Game = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-4">
       <div className="max-w-4xl mx-auto space-y-6 py-8">
+        <div className="text-center py-2 bg-muted rounded-lg">
+          <p className="text-lg font-semibold">Jugando como: {currentPlayer.name}</p>
+        </div>
         {!voting ? (
           <>
             <Card className={`p-12 text-center ${isImpostor ? 'gradient-impostor border-2 border-destructive' : 'gradient-primary border-2 border-primary'}`}>
