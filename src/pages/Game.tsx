@@ -20,6 +20,7 @@ const Game = () => {
   const [hasVoted, setHasVoted] = useState(false);
   const [isHost, setIsHost] = useState(false);
   const [roundNumber, setRoundNumber] = useState(0);
+  const [votesCounted, setVotesCounted] = useState(false);
 
   useEffect(() => {
     const playerName = localStorage.getItem('playerName');
@@ -39,7 +40,7 @@ const Game = () => {
   const startVoting = async () => {
     if (!room) return;
     setVoting(true);
-    setRoundNumber(prev => prev + 1);
+    setRoundNumber((room.current_phrase_index || 0) + 1);
   };
 
   const submitVote = async () => {
@@ -83,6 +84,15 @@ const Game = () => {
         .eq('round_number', roundNumber);
 
       if (error) throw error;
+
+      const totalVotes = votes?.length || 0;
+      if (totalVotes < activePlayers.length) {
+        toast({
+          title: 'Esperando votos',
+          description: 'No todos los jugadores han votado aún',
+        });
+        return;
+      }
 
       // Contar votos
       const voteCounts: Record<string, number> = {};
@@ -128,6 +138,7 @@ const Game = () => {
           setSelectedVote(null);
         }
       }
+      setVotesCounted(true);
     } catch (error) {
       console.error('Error counting votes:', error);
     }
@@ -166,7 +177,7 @@ const Game = () => {
     setVoting(false);
     setHasVoted(false);
     setSelectedVote(null);
-    setRoundNumber(0);
+    setVotesCounted(false);
   };
 
   if (loading) {
@@ -218,7 +229,7 @@ const Game = () => {
 
             <PlayerList players={players} showEliminated />
 
-            {isHost && !currentPlayer.is_eliminated && (
+            {!currentPlayer.is_eliminated && (
               <Button
                 onClick={startVoting}
                 className="w-full h-14 text-lg font-semibold bg-secondary hover:bg-secondary/90"
@@ -267,7 +278,7 @@ const Game = () => {
                 <p className="text-muted-foreground">
                   Esperando a que todos voten...
                 </p>
-                {isHost && (
+                {hasVoted && !votesCounted && (
                   <Button
                     onClick={countVotes}
                     className="mt-6 gradient-primary"
