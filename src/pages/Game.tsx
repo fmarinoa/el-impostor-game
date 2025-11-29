@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { PlayerList } from '@/components/PlayerList';
-import { useRoom, Player } from '@/hooks/useRoom';
+import { useRoom, Player, RoomStatus } from '@/hooks/useRoom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, Vote, AlertTriangle, Trophy } from 'lucide-react';
@@ -31,6 +31,7 @@ const Game = () => {
     }
     if (room) {
       setIsHost(room.host_name === playerName);
+      setVoting(room.status === RoomStatus.VOTING);
     }
   }, [players, room]);
 
@@ -41,10 +42,14 @@ const Game = () => {
     if (!room) return;
     setVoting(true);
     setRoundNumber((room.current_phrase_index || 0) + 1);
+    await supabase
+      .from('rooms')
+      .update({ status: RoomStatus.VOTING })
+      .eq('id', room.id);
   };
 
   const submitVote = async () => {
-    if (!selectedVote || !room || !currentPlayer) return;
+    if (!selectedVote || !room || !currentPlayer || hasVoted) return;
 
     try {
       const { error } = await supabase
@@ -136,6 +141,11 @@ const Game = () => {
           setVoting(false);
           setHasVoted(false);
           setSelectedVote(null);
+          setRoundNumber(prev => prev + 1);
+          await supabase
+            .from('rooms')
+            .update({ status: RoomStatus.PLAYING })
+            .eq('id', room.id);
         }
       }
       setVotesCounted(true);
@@ -152,7 +162,7 @@ const Game = () => {
     if (nextIndex >= room.phrases.length) {
       await supabase
         .from('rooms')
-        .update({ status: 'finished' })
+        .update({ status: RoomStatus.FINISHED })
         .eq('id', room.id);
       return;
     }
@@ -171,6 +181,7 @@ const Game = () => {
       .update({
         current_phrase_index: nextIndex,
         impostor_player_id: randomImpostor.id,
+        status: RoomStatus.PLAYING,
       })
       .eq('id', room.id);
 
@@ -229,7 +240,7 @@ const Game = () => {
 
             <PlayerList players={players} showEliminated />
 
-            {!currentPlayer.is_eliminated && (
+            {isHost && !currentPlayer.is_eliminated && (
               <Button
                 onClick={startVoting}
                 className="w-full h-14 text-lg font-semibold bg-secondary hover:bg-secondary/90"
@@ -278,15 +289,15 @@ const Game = () => {
                 <p className="text-muted-foreground">
                   Esperando a que todos voten...
                 </p>
-                {hasVoted && !votesCounted && (
-                  <Button
-                    onClick={countVotes}
-                    className="mt-6 gradient-primary"
-                  >
-                    Contar Votos
-                  </Button>
-                )}
               </div>
+            )}
+            {isHost && !votesCounted && (
+              <Button
+                onClick={countVotes}
+                className="mt-6 gradient-primary"
+              >
+                Contar Votos
+              </Button>
             )}
           </Card>
         )}
