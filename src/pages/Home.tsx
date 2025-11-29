@@ -140,7 +140,7 @@ const Home = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
       <Card className="w-full max-w-md p-8 space-y-8 border-2 shadow-glow">
         <div className="text-center space-y-2">
-          <h1 className="text-5xl font-bold gradient-primary bg-clip-text text-transparent">
+          <h1 className="text-5xl font-bold gradient-primary bg-clip-text">
             El Impostor
           </h1>
           <p className="text-muted-foreground">
