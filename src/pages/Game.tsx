@@ -32,6 +32,7 @@ const Game = () => {
     if (room) {
       setIsHost(room.host_name === playerName);
       setVoting(room.status === RoomStatus.VOTING);
+      setRoundNumber((room.current_phrase_index || 0) + 1);
     }
   }, [players, room]);
 
