@@ -43,7 +43,7 @@ export const useRoom = (roomCode: string | null) => {
       return;
     }
 
-    setRoom(data as any as Room);
+    setRoom(data as Room);
   }, [roomCode]);
 
   const fetchPlayers = useCallback(async () => {
@@ -93,7 +93,7 @@ export const useRoom = (roomCode: string | null) => {
         },
         (payload) => {
           if (payload.eventType === 'UPDATE' && payload.new) {
-            setRoom(payload.new as any as Room);
+            setRoom(payload.new as Room);
           }
         }
       )
