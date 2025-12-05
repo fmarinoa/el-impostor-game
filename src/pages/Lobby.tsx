@@ -9,6 +9,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Play, ArrowLeft, Users } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 const Lobby = () => {
   const { code } = useParams<{ code: string }>();
@@ -18,6 +20,8 @@ const Lobby = () => {
   const [phrasesText, setPhrasesText] = useState('');
   const [isHost, setIsHost] = useState(false);
   const [starting, setStarting] = useState(false);
+  const [minPlayers, setMinPlayers] = useState(3);
+  const [maxPlayers, setMaxPlayers] = useState(10);
 
   useEffect(() => {
     const playerName = localStorage.getItem('playerName');
@@ -49,10 +53,10 @@ const Lobby = () => {
       return;
     }
 
-    if (players.length < 3) {
+    if (players.length > maxPlayers || players.length < minPlayers) {
       toast({
         title: 'Error',
-        description: 'Se necesitan al menos 3 jugadores para comenzar',
+        description: `Se necesitan entre ${minPlayers} y ${maxPlayers} jugadores para comenzar`,
         variant: 'destructive',
       });
       return;
@@ -153,6 +157,34 @@ const Lobby = () => {
                   onChange={(e) => setPhrasesText(e.target.value)}
                   className="min-h-[200px] font-mono"
                 />
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">
+                  Jugadores mínimos
+                  </Label>
+                  <Input
+                  type="number" 
+                  min="2"
+                  max="20"
+                  value={minPlayers}
+                  onChange={(e) => setMinPlayers(Number(e.target.value))}
+                  className="w-full"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">
+                  Jugadores máximos
+                  </Label>
+                  <Input
+                  type="number" 
+                  min="2"
+                  max="20"
+                  value={maxPlayers}
+                  onChange={(e) => setMaxPlayers(Number(e.target.value))}
+                  className="w-full"
+                  />
+                </div>
               </div>
 
               <Button
