@@ -158,7 +158,7 @@ const Lobby = () => {
                   className="min-h-[200px] font-mono"
                 />
               </div>
-              <div className="space-y-3">
+                <div className="space-x-3 flex flex-row">
                 <div>
                   <Label className="text-sm font-medium mb-2 block">
                   Jugadores mínimos
