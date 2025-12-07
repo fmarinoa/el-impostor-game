@@ -34,6 +34,13 @@ const Game = () => {
       setIsHost(room.host_name === playerName);
       setVoting(room.status === RoomStatus.VOTING);
       setRoundNumber((room.current_phrase_index || 0) + 1);
+      
+      // Resetear hasVoted cuando cambia el estado de la sala a PLAYING
+      if (room.status === RoomStatus.PLAYING) {
+        setHasVoted(false);
+        setSelectedVote(null);
+        setVotesCounted(false);
+      }
     }
   }, [players, room]);
 
