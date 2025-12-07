@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { RoomCode } from "@/components/RoomCode";
 import { PlayerList } from "@/components/PlayerList";
-import { useRoom } from "@/hooks/useRoom";
+import { useRoom, RoomStatus } from "@/hooks/useRoom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Play, ArrowLeft, Users } from "lucide-react";
@@ -31,7 +31,7 @@ const Lobby = () => {
   }, [room]);
 
   useEffect(() => {
-    if (room?.status === "playing") {
+    if (room?.status === RoomStatus.PLAYING) {
       navigate(`/game/${code}`);
     }
   }, [room?.status, code, navigate]);
@@ -76,7 +76,7 @@ const Lobby = () => {
         .from("rooms")
         .update({
           phrases: shuffledPhrases,
-          status: "playing",
+          status: RoomStatus.PLAYING,
           impostor_player_id: randomImpostor.id,
           current_phrase_index: 0,
         })
