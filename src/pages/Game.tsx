@@ -208,7 +208,7 @@ const Game = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
+      <div className="min-h-full bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
         <p className="text-lg">Cargando juego...</p>
       </div>
     );
@@ -216,7 +216,7 @@ const Game = () => {
 
   if (!room || !currentPlayer) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
+      <div className="min-h-full bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
         <Card className="p-8 text-center">
           <p className="text-lg mb-4">Error al cargar el juego</p>
           <Button onClick={() => navigate("/")}>Volver al inicio</Button>
@@ -227,7 +227,7 @@ const Game = () => {
 
   if (room.status === RoomStatus.FINISHED) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
+      <div className="min-h-full bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
         <Card className="p-8 text-center">
           <Trophy className="h-16 w-16 text-primary mx-auto mb-4" />
           <h2 className="text-2xl font-bold mb-4">Juego Terminado</h2>
@@ -239,7 +239,7 @@ const Game = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-4">
+    <div className="bg-gradient-to-br from-background via-background to-primary/5 p-4">
       <div className="max-w-4xl mx-auto space-y-6 py-8">
         <div className="text-center py-2 bg-muted rounded-lg">
           <p className="text-lg font-semibold">

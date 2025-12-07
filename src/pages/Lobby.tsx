@@ -126,7 +126,7 @@ const Lobby = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
+      <div className="min-h-full bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
         <p className="text-lg">Cargando sala...</p>
       </div>
     );
@@ -134,7 +134,7 @@ const Lobby = () => {
 
   if (!room) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
+      <div className="min-h-full bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
         <Card className="p-8 text-center">
           <p className="text-lg mb-4">Sala no encontrada</p>
           <Button onClick={() => navigate("/")}>
@@ -147,7 +147,7 @@ const Lobby = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-4">
+    <div className="bg-gradient-to-br from-background via-background to-primary/5 p-4">
       <div className="max-w-4xl mx-auto space-y-6 py-8">
         <Button variant="ghost" onClick={handleLeaveRoom} className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />
