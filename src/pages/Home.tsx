@@ -1,22 +1,23 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { Users, Plus } from 'lucide-react';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Users, Plus } from "lucide-react";
+import { Label } from "@/components/ui/label";
 
 const Home = () => {
-  const [playerName, setPlayerName] = useState('');
-  const [roomCode, setRoomCode] = useState('');
+  const [playerName, setPlayerName] = useState("");
+  const [roomCode, setRoomCode] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const generateRoomCode = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code = '';
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let code = "";
     for (let i = 0; i < 6; i++) {
       code += chars.charAt(Math.floor(Math.random() * chars.length));
     }
@@ -26,9 +27,9 @@ const Home = () => {
   const createRoom = async () => {
     if (!playerName.trim()) {
       toast({
-        title: 'Error',
-        description: 'Por favor ingresa tu nombre',
-        variant: 'destructive',
+        title: "Error",
+        description: "Por favor ingresa tu nombre",
+        variant: "destructive",
       });
       return;
     }
@@ -38,36 +39,34 @@ const Home = () => {
 
     try {
       const { data: room, error: roomError } = await supabase
-        .from('rooms')
+        .from("rooms")
         .insert({
           code,
           host_name: playerName,
-          status: 'lobby',
+          status: "lobby",
         })
         .select()
         .single();
 
       if (roomError) throw roomError;
 
-      const { error: playerError } = await supabase
-        .from('players')
-        .insert({
-          room_id: room.id,
-          name: playerName,
-          is_host: true,
-        });
+      const { error: playerError } = await supabase.from("players").insert({
+        room_id: room.id,
+        name: playerName,
+        is_host: true,
+      });
 
       if (playerError) throw playerError;
 
-      localStorage.setItem('playerName', playerName);
-      localStorage.setItem('roomCode', code);
+      localStorage.setItem("playerName", playerName);
+      localStorage.setItem("roomCode", code);
       navigate(`/lobby/${code}`);
     } catch (error) {
-      console.error('Error creating room:', error);
+      console.error("Error creating room:", error);
       toast({
-        title: 'Error',
-        description: 'No se pudo crear la sala',
-        variant: 'destructive',
+        title: "Error",
+        description: "No se pudo crear la sala",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -77,9 +76,9 @@ const Home = () => {
   const joinRoom = async () => {
     if (!playerName.trim() || !roomCode.trim()) {
       toast({
-        title: 'Error',
-        description: 'Por favor completa todos los campos',
-        variant: 'destructive',
+        title: "Error",
+        description: "Por favor completa todos los campos",
+        variant: "destructive",
       });
       return;
     }
@@ -88,48 +87,46 @@ const Home = () => {
 
     try {
       const { data: room, error: roomError } = await supabase
-        .from('rooms')
-        .select('*')
-        .eq('code', roomCode.toUpperCase())
+        .from("rooms")
+        .select("*")
+        .eq("code", roomCode.toUpperCase())
         .single();
 
       if (roomError || !room) {
         toast({
-          title: 'Error',
-          description: 'Sala no encontrada',
-          variant: 'destructive',
+          title: "Error",
+          description: "Sala no encontrada",
+          variant: "destructive",
         });
         setLoading(false);
         return;
       }
 
-      const { error: playerError } = await supabase
-        .from('players')
-        .insert({
-          room_id: room.id,
-          name: playerName,
-          is_host: false,
-        });
+      const { error: playerError } = await supabase.from("players").insert({
+        room_id: room.id,
+        name: playerName,
+        is_host: false,
+      });
 
       if (playerError) {
         toast({
-          title: 'Error',
-          description: 'No se pudo unir a la sala',
-          variant: 'destructive',
+          title: "Error",
+          description: "No se pudo unir a la sala",
+          variant: "destructive",
         });
         setLoading(false);
         return;
       }
 
-      localStorage.setItem('playerName', playerName);
-      localStorage.setItem('roomCode', roomCode.toUpperCase());
+      localStorage.setItem("playerName", playerName);
+      localStorage.setItem("roomCode", roomCode.toUpperCase());
       navigate(`/lobby/${roomCode.toUpperCase()}`);
     } catch (error) {
-      console.error('Error joining room:', error);
+      console.error("Error joining room:", error);
       toast({
-        title: 'Error',
-        description: 'No se pudo unir a la sala',
-        variant: 'destructive',
+        title: "Error",
+        description: "No se pudo unir a la sala",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -150,9 +147,7 @@ const Home = () => {
 
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-medium mb-2 block">
-              Tu nombre
-            </label>
+            <Label className="text-sm font-medium mb-2 block">Tu nombre</Label>
             <Input
               placeholder="Ingresa tu nombre..."
               value={playerName}
@@ -183,9 +178,9 @@ const Home = () => {
           </div>
 
           <div>
-            <label className="text-sm font-medium mb-2 block">
+            <Label className="text-sm font-medium mb-2 block">
               Código de sala
-            </label>
+            </Label>
             <Input
               placeholder="Ej: ABC123"
               value={roomCode}

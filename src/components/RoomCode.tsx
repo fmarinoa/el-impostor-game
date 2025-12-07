@@ -1,6 +1,6 @@
-import { Copy, Check } from 'lucide-react';
-import { useState } from 'react';
-import { Button } from './ui/button';
+import { Copy, Check } from "lucide-react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 interface RoomCodeProps {
   code: string;
@@ -18,7 +18,9 @@ export const RoomCode = ({ code }: RoomCodeProps) => {
   return (
     <div className="flex items-center gap-3 bg-card border-2 border-primary rounded-xl p-4 shadow-glow">
       <div className="flex-1">
-        <p className="text-sm text-muted-foreground font-medium">Código de Sala</p>
+        <p className="text-sm text-muted-foreground font-medium">
+          Código de Sala
+        </p>
         <p className="text-3xl font-bold text-primary tracking-wider">{code}</p>
       </div>
       <Button

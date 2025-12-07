@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface Player {
   id: string;
@@ -9,10 +9,10 @@ export interface Player {
 }
 
 export enum RoomStatus {
-  LOBBY = 'lobby',
-  PLAYING = 'playing',
-  VOTING = 'voting',
-  FINISHED = 'finished',
+  LOBBY = "lobby",
+  PLAYING = "playing",
+  VOTING = "voting",
+  FINISHED = "finished",
 }
 
 export interface Room {
@@ -33,13 +33,13 @@ export const useRoom = (roomCode: string | null) => {
   const fetchRoom = useCallback(async () => {
     if (!roomCode) return;
     const { data, error } = await supabase
-      .from('rooms')
-      .select('*')
-      .eq('code', roomCode)
+      .from("rooms")
+      .select("*")
+      .eq("code", roomCode)
       .single();
 
     if (error) {
-      console.error('Error fetching room:', error);
+      console.error("Error fetching room:", error);
       return;
     }
 
@@ -49,21 +49,21 @@ export const useRoom = (roomCode: string | null) => {
   const fetchPlayers = useCallback(async () => {
     if (!roomCode) return;
     const { data: roomData } = await supabase
-      .from('rooms')
-      .select('id')
-      .eq('code', roomCode)
+      .from("rooms")
+      .select("id")
+      .eq("code", roomCode)
       .single();
 
     if (!roomData) return;
 
     const { data, error } = await supabase
-      .from('players')
-      .select('*')
-      .eq('room_id', roomData.id)
-      .order('joined_at', { ascending: true });
+      .from("players")
+      .select("*")
+      .eq("room_id", roomData.id)
+      .order("joined_at", { ascending: true });
 
     if (error) {
-      console.error('Error fetching players:', error);
+      console.error("Error fetching players:", error);
       return;
     }
 
@@ -84,50 +84,50 @@ export const useRoom = (roomCode: string | null) => {
     const roomChannel = supabase
       .channel(`room-${roomCode}`)
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'rooms',
+          event: "*",
+          schema: "public",
+          table: "rooms",
           filter: `code=eq.${roomCode}`,
         },
         (payload) => {
-          if (payload.eventType === 'UPDATE' && payload.new) {
+          if (payload.eventType === "UPDATE" && payload.new) {
             setRoom(payload.new as Room);
           }
-        }
+        },
       )
       .subscribe();
 
     const playersChannel = supabase
       .channel(`players-${roomCode}`)
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'players',
+          event: "*",
+          schema: "public",
+          table: "players",
         },
         () => {
           fetchPlayers();
-        }
+        },
       )
       .subscribe();
 
     // Listener para cuando la pestaña se vuelve visible
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
+      if (document.visibilityState === "visible") {
         fetchRoom();
         fetchPlayers();
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       supabase.removeChannel(roomChannel);
       supabase.removeChannel(playersChannel);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [roomCode, fetchRoom, fetchPlayers]);
 

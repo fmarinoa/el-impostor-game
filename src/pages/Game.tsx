@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { PlayerList } from '@/components/PlayerList';
-import { useRoom, Player, RoomStatus } from '@/hooks/useRoom';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { Eye, Vote, AlertTriangle, Trophy } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { PlayerList } from "@/components/PlayerList";
+import { useRoom, Player, RoomStatus } from "@/hooks/useRoom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Eye, Vote, AlertTriangle, Trophy } from "lucide-react";
 
 const Game = () => {
   const { code } = useParams<{ code: string }>();
@@ -23,8 +23,8 @@ const Game = () => {
   const [votesCounted, setVotesCounted] = useState(false);
 
   useEffect(() => {
-    const playerName = localStorage.getItem('playerName');
-    const player = players.find(p => p.name === playerName);
+    const playerName = localStorage.getItem("playerName");
+    const player = players.find((p) => p.name === playerName);
     if (player) {
       setCurrentPlayer(player);
       setIsImpostor(room?.impostor_player_id === player.id);
@@ -38,52 +38,47 @@ const Game = () => {
 
   useEffect(() => {
     if (room?.status === RoomStatus.FINISHED) {
-      supabase
-        .from('rooms')
-        .delete()
-        .eq('id', room.id)
+      supabase.from("rooms").delete().eq("id", room.id);
     }
   }, [room?.status, room?.id]);
 
   const currentPhrase = room?.phrases[room.current_phrase_index || 0];
-  const activePlayers = players.filter(p => !p.is_eliminated);
+  const activePlayers = players.filter((p) => !p.is_eliminated);
 
   const startVoting = async () => {
     if (!room) return;
     setVoting(true);
     setRoundNumber((room.current_phrase_index || 0) + 1);
     await supabase
-      .from('rooms')
+      .from("rooms")
       .update({ status: RoomStatus.VOTING })
-      .eq('id', room.id);
+      .eq("id", room.id);
   };
 
   const submitVote = async () => {
     if (!selectedVote || !room || !currentPlayer || hasVoted) return;
 
     try {
-      const { error } = await supabase
-        .from('votes')
-        .insert({
-          room_id: room.id,
-          voter_id: currentPlayer.id,
-          voted_for_id: selectedVote,
-          round_number: roundNumber,
-        });
+      const { error } = await supabase.from("votes").insert({
+        room_id: room.id,
+        voter_id: currentPlayer.id,
+        voted_for_id: selectedVote,
+        round_number: roundNumber,
+      });
 
       if (error) throw error;
 
       setHasVoted(true);
       toast({
-        title: 'Voto registrado',
-        description: 'Esperando a que todos voten...',
+        title: "Voto registrado",
+        description: "Esperando a que todos voten...",
       });
     } catch (error) {
-      console.error('Error voting:', error);
+      console.error("Error voting:", error);
       toast({
-        title: 'Error',
-        description: 'No se pudo registrar el voto',
-        variant: 'destructive',
+        title: "Error",
+        description: "No se pudo registrar el voto",
+        variant: "destructive",
       });
     }
   };
@@ -93,77 +88,80 @@ const Game = () => {
 
     try {
       const { data: votes, error } = await supabase
-        .from('votes')
-        .select('voted_for_id')
-        .eq('room_id', room.id)
-        .eq('round_number', roundNumber);
+        .from("votes")
+        .select("voted_for_id")
+        .eq("room_id", room.id)
+        .eq("round_number", roundNumber);
 
       if (error) throw error;
 
       const totalVotes = votes?.length || 0;
       if (totalVotes < activePlayers.length) {
         toast({
-          title: 'Esperando votos',
-          description: 'No todos los jugadores han votado aún',
+          title: "Esperando votos",
+          description: "No todos los jugadores han votado aún",
         });
         return;
       }
 
       // Contar votos
       const voteCounts: Record<string, number> = {};
-      votes?.forEach(vote => {
-        voteCounts[vote.voted_for_id] = (voteCounts[vote.voted_for_id] || 0) + 1;
-      });
+      for (const vote of votes) {
+        voteCounts[vote.voted_for_id] =
+          (voteCounts[vote.voted_for_id] || 0) + 1;
+      }
 
       // Encontrar el más votado
       let maxVotes = 0;
-      let mostVoted = '';
-      Object.entries(voteCounts).forEach(([playerId, count]) => {
+      let mostVoted = "";
+      for (const [playerId, count] of Object.entries(voteCounts)) {
         if (count > maxVotes) {
           maxVotes = count;
           mostVoted = playerId;
         }
-      });
+      }
 
       // Verificar si el más votado es el impostor
       if (mostVoted === room.impostor_player_id) {
         toast({
-          title: '¡Impostor eliminado!',
-          description: 'Los jugadores han ganado esta ronda',
+          title: "¡Impostor eliminado!",
+          description: "Los jugadores han ganado esta ronda",
         });
         nextPhrase();
       } else {
         // Eliminar al jugador votado
         await supabase
-          .from('players')
+          .from("players")
           .update({ is_eliminated: true })
-          .eq('id', mostVoted);
+          .eq("id", mostVoted);
 
         // Verificar si solo quedan 2 jugadores (impostor gana)
-        const remainingPlayers = activePlayers.filter(p => p.id !== mostVoted);
+        const remainingPlayers = activePlayers.filter(
+          (p) => p.id !== mostVoted,
+        );
         if (remainingPlayers.length <= 2) {
           toast({
-            title: '¡El impostor ha ganado!',
-            description: 'Solo quedaban 2 jugadores',
+            title: "¡El impostor ha ganado!",
+            description: "Solo quedaban 2 jugadores",
           });
           await supabase
-            .from('rooms')
+            .from("rooms")
             .update({ status: RoomStatus.FINISHED })
-            .eq('id', room.id);
+            .eq("id", room.id);
         } else {
           setVoting(false);
           setHasVoted(false);
           setSelectedVote(null);
-          setRoundNumber(prev => prev + 1);
+          setRoundNumber((prev) => prev + 1);
           await supabase
-            .from('rooms')
+            .from("rooms")
             .update({ status: RoomStatus.PLAYING })
-            .eq('id', room.id);
+            .eq("id", room.id);
         }
       }
       setVotesCounted(true);
     } catch (error) {
-      console.error('Error counting votes:', error);
+      console.error("Error counting votes:", error);
     }
   };
 
@@ -174,29 +172,29 @@ const Game = () => {
 
     if (nextIndex >= room.phrases.length) {
       await supabase
-        .from('rooms')
+        .from("rooms")
         .update({ status: RoomStatus.FINISHED })
-        .eq('id', room.id);
+        .eq("id", room.id);
       return;
     }
 
     // Reiniciar jugadores
     await supabase
-      .from('players')
+      .from("players")
       .update({ is_eliminated: false })
-      .eq('room_id', room.id);
+      .eq("room_id", room.id);
 
     // Nuevo impostor
     const randomImpostor = players[Math.floor(Math.random() * players.length)];
 
     await supabase
-      .from('rooms')
+      .from("rooms")
       .update({
         current_phrase_index: nextIndex,
         impostor_player_id: randomImpostor.id,
         status: RoomStatus.PLAYING,
       })
-      .eq('id', room.id);
+      .eq("id", room.id);
 
     setVoting(false);
     setHasVoted(false);
@@ -217,7 +215,7 @@ const Game = () => {
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
         <Card className="p-8 text-center">
           <p className="text-lg mb-4">Error al cargar el juego</p>
-          <Button onClick={() => navigate('/')}>Volver al inicio</Button>
+          <Button onClick={() => navigate("/")}>Volver al inicio</Button>
         </Card>
       </div>
     );
@@ -230,7 +228,7 @@ const Game = () => {
           <Trophy className="h-16 w-16 text-primary mx-auto mb-4" />
           <h2 className="text-2xl font-bold mb-4">Juego Terminado</h2>
           <p className="text-muted-foreground mb-6">Gracias por jugar</p>
-          <Button onClick={() => navigate('/')}>Volver al inicio</Button>
+          <Button onClick={() => navigate("/")}>Volver al inicio</Button>
         </Card>
       </div>
     );
@@ -240,7 +238,9 @@ const Game = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-4">
       <div className="max-w-4xl mx-auto space-y-6 py-8">
         <div className="text-center py-2 bg-muted rounded-lg">
-          <p className="text-lg font-semibold">Jugando como: {currentPlayer.name}</p>
+          <p className="text-lg font-semibold">
+            Jugando como: {currentPlayer.name}
+          </p>
         </div>
         {isHost && (
           <div className="inline-block align-middle">
@@ -251,12 +251,12 @@ const Game = () => {
               onClick={async () => {
                 if (!room) return;
                 await supabase
-                  .from('rooms')
+                  .from("rooms")
                   .update({ status: RoomStatus.FINISHED })
-                  .eq('id', room.id);
+                  .eq("id", room.id);
                 toast({
-                  title: 'Juego terminado',
-                  description: 'La sala ha sido marcada como finalizada',
+                  title: "Juego terminado",
+                  description: "La sala ha sido marcada como finalizada",
                 });
               }}
             >
@@ -265,9 +265,60 @@ const Game = () => {
             </Button>
           </div>
         )}
-        {!voting ? (
+        {voting ? (
+          <Card className="p-8">
+            <div className="flex items-center gap-3 mb-6">
+              <Vote className="h-6 w-6 text-primary" />
+              <h2 className="text-2xl font-bold">Votación</h2>
+            </div>
+
+            {hasVoted ? (
+              <div className="text-center py-8">
+                <Trophy className="h-16 w-16 text-primary mx-auto mb-4" />
+                <p className="text-lg font-medium mb-2">Voto registrado</p>
+                <p className="text-muted-foreground">
+                  Esperando a que todos voten...
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <p className="text-muted-foreground mb-4">
+                  Selecciona quién crees que es el impostor:
+                </p>
+                {activePlayers
+                  .filter((p) => p.id !== currentPlayer.id)
+                  .map((player) => (
+                    <Button
+                      key={player.id}
+                      variant={
+                        selectedVote === player.id ? "default" : "outline"
+                      }
+                      className="w-full h-14 text-lg justify-start"
+                      onClick={() => setSelectedVote(player.id)}
+                    >
+                      {player.name}
+                    </Button>
+                  ))}
+                <Button
+                  onClick={submitVote}
+                  disabled={!selectedVote}
+                  className="w-full h-14 text-lg font-semibold gradient-primary"
+                >
+                  Confirmar Voto
+                </Button>
+              </div>
+            )}
+            {isHost && !votesCounted && (
+              <Button onClick={countVotes} className="mt-6 gradient-primary">
+                Contar Votos
+              </Button>
+            )}
+          </Card>
+        ) : (
           <>
-            <Card className={`p-12 text-center ${isImpostor ? 'gradient-impostor border-2 border-destructive' : 'gradient-primary border-2 border-primary'}`}>
+            <Card
+              className={`p-12 text-center ${isImpostor ? "gradient-impostor border-2 border-destructive" : "gradient-primary border-2 border-primary"}`}
+            >
               <div className="flex items-center justify-center mb-6">
                 {isImpostor ? (
                   <AlertTriangle className="h-16 w-16 text-destructive-foreground" />
@@ -276,12 +327,10 @@ const Game = () => {
                 )}
               </div>
               <h2 className="text-4xl font-bold mb-4 text-white">
-                {isImpostor ? '¡Eres el IMPOSTOR!' : 'Tu frase es:'}
+                {isImpostor ? "¡Eres el IMPOSTOR!" : "Tu frase es:"}
               </h2>
               {!isImpostor && (
-                <p className="text-3xl font-bold text-white">
-                  {currentPhrase}
-                </p>
+                <p className="text-3xl font-bold text-white">{currentPhrase}</p>
               )}
               {isImpostor && (
                 <p className="text-xl text-white/90 mt-4">
@@ -302,56 +351,6 @@ const Game = () => {
               </Button>
             )}
           </>
-        ) : (
-          <Card className="p-8">
-            <div className="flex items-center gap-3 mb-6">
-              <Vote className="h-6 w-6 text-primary" />
-              <h2 className="text-2xl font-bold">Votación</h2>
-            </div>
-
-            {!hasVoted ? (
-              <div className="space-y-4">
-                <p className="text-muted-foreground mb-4">
-                  Selecciona quién crees que es el impostor:
-                </p>
-                {activePlayers
-                  .filter(p => p.id !== currentPlayer.id)
-                  .map(player => (
-                    <Button
-                      key={player.id}
-                      variant={selectedVote === player.id ? 'default' : 'outline'}
-                      className="w-full h-14 text-lg justify-start"
-                      onClick={() => setSelectedVote(player.id)}
-                    >
-                      {player.name}
-                    </Button>
-                  ))}
-                <Button
-                  onClick={submitVote}
-                  disabled={!selectedVote}
-                  className="w-full h-14 text-lg font-semibold gradient-primary"
-                >
-                  Confirmar Voto
-                </Button>
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <Trophy className="h-16 w-16 text-primary mx-auto mb-4" />
-                <p className="text-lg font-medium mb-2">Voto registrado</p>
-                <p className="text-muted-foreground">
-                  Esperando a que todos voten...
-                </p>
-              </div>
-            )}
-            {isHost && !votesCounted && (
-              <Button
-                onClick={countVotes}
-                className="mt-6 gradient-primary"
-              >
-                Contar Votos
-              </Button>
-            )}
-          </Card>
         )}
       </div>
     </div>
