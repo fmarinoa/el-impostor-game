@@ -144,10 +144,7 @@ const Game = () => {
             title: "¡El impostor ha ganado!",
             description: "Solo quedaban 2 jugadores",
           });
-          await supabase
-            .from("rooms")
-            .update({ status: RoomStatus.FINISHED })
-            .eq("id", room.id);
+          nextPhrase();
         } else {
           setVoting(false);
           setHasVoted(false);
