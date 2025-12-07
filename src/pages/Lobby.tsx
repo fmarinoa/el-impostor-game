@@ -22,6 +22,7 @@ const Lobby = () => {
   const [starting, setStarting] = useState(false);
   const [minPlayers, setMinPlayers] = useState(3);
   const [maxPlayers, setMaxPlayers] = useState(10);
+  const [minImpostors, setMinImpostors] = useState(1);
 
   useEffect(() => {
     const playerName = localStorage.getItem("playerName");
@@ -57,6 +58,15 @@ const Lobby = () => {
       toast({
         title: "Error",
         description: `Se necesitan entre ${minPlayers} y ${maxPlayers} jugadores para comenzar`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (minImpostors > players.length - 2) {
+      toast({
+        title: "Error",
+        description: `La cantidad de impostores no puede ser mayor que el número de jugadores menos 2`,
         variant: "destructive",
       });
       return;
@@ -182,11 +192,24 @@ const Lobby = () => {
                     className="w-full"
                   />
                 </div>
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">
+                    Cantidad de Impostores
+                  </Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    max={players.length - 2}
+                    value={minImpostors}
+                    onChange={(e) => setMinImpostors(Number(e.target.value))}
+                    className="w-full"
+                  />
+                </div>
               </div>
 
               <Button
                 onClick={startGame}
-                disabled={starting || players.length < 3}
+                disabled={starting || players.length < minPlayers}
                 className="w-full h-12 text-lg font-semibold gradient-primary hover:opacity-90"
               >
                 <Play className="mr-2 h-5 w-5" />
