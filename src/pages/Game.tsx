@@ -327,11 +327,16 @@ const Game = () => {
                   Intenta descubrir la frase sin que te descubran
                 </p>
               )}
+              {isImpostor && (
+                <audio src="/sound-impostor.weba" autoPlay>
+                  <track kind="captions" />
+                </audio>
+              )}
             </Card>
 
             <PlayerList players={players} showEliminated />
 
-            {isHost && !currentPlayer.is_eliminated && (
+            {isHost && (
               <Button
                 onClick={startVoting}
                 className="w-full h-14 text-lg font-semibold bg-secondary hover:bg-secondary/90"
