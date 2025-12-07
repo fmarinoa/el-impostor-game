@@ -7,6 +7,7 @@ import { useRoom, Player, RoomStatus } from "@/hooks/useRoom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, Vote, AlertTriangle, Trophy } from "lucide-react";
+import { deleteRoomAndNavigate } from "@/lib/roomUtils";
 
 const Game = () => {
   const { code } = useParams<{ code: string }>();
@@ -36,14 +37,13 @@ const Game = () => {
     }
   }, [players, room]);
 
-  useEffect(() => {
-    if (room?.status === RoomStatus.FINISHED) {
-      supabase.from("rooms").delete().eq("id", room.id);
-    }
-  }, [room?.status, room?.id]);
-
   const currentPhrase = room?.phrases[room.current_phrase_index || 0];
   const activePlayers = players.filter((p) => !p.is_eliminated);
+
+  const handleEndGame = async () => {
+    if (!room) return;
+    await deleteRoomAndNavigate(room.id, navigate, toast);
+  };
 
   const startVoting = async () => {
     if (!room) return;
@@ -248,17 +248,7 @@ const Game = () => {
               variant="ghost"
               size="sm"
               className="inline-flex items-center h-8 px-3 text-sm"
-              onClick={async () => {
-                if (!room) return;
-                await supabase
-                  .from("rooms")
-                  .update({ status: RoomStatus.FINISHED })
-                  .eq("id", room.id);
-                toast({
-                  title: "Juego terminado",
-                  description: "La sala ha sido marcada como finalizada",
-                });
-              }}
+              onClick={handleEndGame}
             >
               <Trophy className="mr-2 h-4 w-4" />
               Terminar Juego

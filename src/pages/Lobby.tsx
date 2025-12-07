@@ -11,6 +11,7 @@ import { Play, ArrowLeft, Users } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { deleteRoomAndNavigate } from "@/lib/roomUtils";
 
 const Lobby = () => {
   const { code } = useParams<{ code: string }>();
@@ -36,6 +37,20 @@ const Lobby = () => {
       navigate(`/game/${code}`);
     }
   }, [room?.status, code, navigate]);
+
+  const handleLeaveRoom = async () => {
+    if (!room) return;
+
+    // Si es el host, eliminar la sala completa
+    if (isHost) {
+      await deleteRoomAndNavigate(room.id, navigate, toast);
+    } else {
+      // Si no es host, solo limpiar y salir
+      localStorage.removeItem("playerName");
+      localStorage.removeItem("roomCode");
+      navigate("/");
+    }
+  };
 
   const startGame = async () => {
     if (!room) return;
@@ -134,9 +149,9 @@ const Lobby = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-4">
       <div className="max-w-4xl mx-auto space-y-6 py-8">
-        <Button variant="ghost" onClick={() => navigate("/")} className="mb-4">
+        <Button variant="ghost" onClick={handleLeaveRoom} className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Salir de la sala
+          {isHost ? "Salir y eliminar sala" : "Salir de la sala"}
         </Button>
 
         <RoomCode code={room.code} />
