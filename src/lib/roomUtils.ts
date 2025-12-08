@@ -28,3 +28,19 @@ export const deleteRoomAndNavigate = async (
     });
   }
 };
+
+export const setPlayersAsImpostors = async (
+  roomId: string,
+  impostorIds: string[],
+): Promise<void> => {
+  // Resetear todos los jugadores a no impostores primero
+  await supabase
+    .from("players")
+    .update({ is_impostor: false })
+    .eq("room_id", roomId);
+  // Marcar los impostores seleccionados
+   await supabase
+    .from("players")
+    .update({ is_impostor: true })
+    .in("id", impostorIds);
+};

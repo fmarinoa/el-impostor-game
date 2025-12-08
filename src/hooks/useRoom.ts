@@ -6,6 +6,7 @@ export interface Player {
   name: string;
   is_eliminated: boolean;
   is_host: boolean;
+  is_impostor: boolean;
 }
 
 export enum RoomStatus {
@@ -22,7 +23,6 @@ export interface Room {
   status: RoomStatus;
   phrases: string[];
   current_phrase_index: number;
-  impostor_player_id: string | null;
 }
 
 export const useRoom = (roomCode: string | null) => {

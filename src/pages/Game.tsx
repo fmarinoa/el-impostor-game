@@ -7,7 +7,7 @@ import { useRoom, Player, RoomStatus } from "@/hooks/useRoom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, Vote, AlertTriangle, Trophy } from "lucide-react";
-import { deleteRoomAndNavigate } from "@/lib/roomUtils";
+import { deleteRoomAndNavigate, setPlayersAsImpostors } from "@/lib/roomUtils";
 
 const Game = () => {
   const { code } = useParams<{ code: string }>();
@@ -28,13 +28,13 @@ const Game = () => {
     const player = players.find((p) => p.name === playerName);
     if (player) {
       setCurrentPlayer(player);
-      setIsImpostor(room?.impostor_player_id === player.id);
+      setIsImpostor(player.is_impostor);
     }
     if (room) {
       setIsHost(room.host_name === playerName);
       setVoting(room.status === RoomStatus.VOTING);
       setRoundNumber((room.current_phrase_index || 0) + 1);
-      
+
       // Resetear hasVoted cuando cambia el estado de la sala a PLAYING
       if (room.status === RoomStatus.PLAYING) {
         setHasVoted(false);
@@ -128,8 +128,9 @@ const Game = () => {
         }
       }
 
-      // Verificar si el más votado es el impostor
-      if (mostVoted === room.impostor_player_id) {
+      // Verificar si el más votado es un impostor
+      const votedPlayer = activePlayers.find((p) => p.id === mostVoted);
+      if (votedPlayer?.is_impostor) {
         toast({
           title: "¡Impostor eliminado!",
           description: "Los jugadores han ganado esta ronda",
@@ -188,17 +189,13 @@ const Game = () => {
       .update({ is_eliminated: false })
       .eq("room_id", room.id);
 
-    // Nuevo impostor
-    const randomImpostor = players[Math.floor(Math.random() * players.length)];
+    // Seleccionar nuevos impostores aleatorios
+    const newImpostorIds = [...players]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, players.filter((p) => p.is_impostor).length)
+      .map((p) => p.id);
 
-    await supabase
-      .from("rooms")
-      .update({
-        current_phrase_index: nextIndex,
-        impostor_player_id: randomImpostor.id,
-        status: RoomStatus.PLAYING,
-      })
-      .eq("id", room.id);
+    await setPlayersAsImpostors(room.id, newImpostorIds);
 
     setVoting(false);
     setHasVoted(false);

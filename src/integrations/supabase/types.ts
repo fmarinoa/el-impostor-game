@@ -19,6 +19,7 @@ export type Database = {
           id: string;
           is_eliminated: boolean | null;
           is_host: boolean | null;
+          is_impostor: boolean | null;
           joined_at: string | null;
           name: string;
           room_id: string;
@@ -27,6 +28,7 @@ export type Database = {
           id?: string;
           is_eliminated?: boolean | null;
           is_host?: boolean | null;
+          is_impostor?: boolean | null;
           joined_at?: string | null;
           name: string;
           room_id: string;
@@ -35,6 +37,7 @@ export type Database = {
           id?: string;
           is_eliminated?: boolean | null;
           is_host?: boolean | null;
+          is_impostor?: boolean | null;
           joined_at?: string | null;
           name?: string;
           room_id?: string;
@@ -56,7 +59,6 @@ export type Database = {
           current_phrase_index: number | null;
           host_name: string;
           id: string;
-          impostor_player_id: string | null;
           phrases: string[] | null;
           status: string;
           updated_at: string | null;
@@ -67,7 +69,6 @@ export type Database = {
           current_phrase_index?: number | null;
           host_name: string;
           id?: string;
-          impostor_player_id?: string | null;
           phrases?: string[] | null;
           status?: string;
           updated_at?: string | null;
@@ -78,7 +79,6 @@ export type Database = {
           current_phrase_index?: number | null;
           host_name?: string;
           id?: string;
-          impostor_player_id?: string | null;
           phrases?: string[] | null;
           status?: string;
           updated_at?: string | null;

@@ -11,7 +11,7 @@ import { Play, ArrowLeft, Users } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { deleteRoomAndNavigate } from "@/lib/roomUtils";
+import { deleteRoomAndNavigate, setPlayersAsImpostors } from "@/lib/roomUtils";
 
 const Lobby = () => {
   const { code } = useParams<{ code: string }>();
@@ -93,16 +93,20 @@ const Lobby = () => {
       // Mezclar frases
       const shuffledPhrases = [...phrases].sort(() => Math.random() - 0.5);
 
-      // Seleccionar impostor aleatorio
-      const randomImpostor =
-        players[Math.floor(Math.random() * players.length)];
+      // Seleccionar impostores aleatorios
+      const impostorIds = [...players]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, minImpostors)
+        .map((p) => p.id);
 
+      await setPlayersAsImpostors(room.id, impostorIds);
+
+      // Actualizar el estado de la sala
       const { error } = await supabase
         .from("rooms")
         .update({
           phrases: shuffledPhrases,
           status: RoomStatus.PLAYING,
-          impostor_player_id: randomImpostor.id,
           current_phrase_index: 0,
         })
         .eq("id", room.id);

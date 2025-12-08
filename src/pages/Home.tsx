@@ -76,18 +76,18 @@ const Home = () => {
   const joinRoom = async () => {
     if (!playerName.trim()) {
       toast({
-      title: "Error",
-      description: "Por favor ingresa tu nombre",
-      variant: "destructive",
+        title: "Error",
+        description: "Por favor ingresa tu nombre",
+        variant: "destructive",
       });
       return;
     }
 
     if (!roomCode.trim()) {
       toast({
-      title: "Error",
-      description: "Por favor ingresa el código de sala",
-      variant: "destructive",
+        title: "Error",
+        description: "Por favor ingresa el código de sala",
+        variant: "destructive",
       });
       return;
     }

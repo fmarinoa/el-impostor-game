@@ -6,7 +6,6 @@ CREATE TABLE public.rooms (
   status text NOT NULL DEFAULT 'lobby', -- lobby, playing, finished
   phrases text[] DEFAULT ARRAY[]::text[],
   current_phrase_index integer DEFAULT 0,
-  impostor_player_id uuid,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
@@ -19,6 +18,7 @@ CREATE TABLE public.players (
   is_eliminated boolean DEFAULT false,
   is_host boolean DEFAULT false,
   joined_at timestamptz DEFAULT now(),
+  is_impostor boolean DEFAULT false,
   UNIQUE(room_id, name)
 );
 
