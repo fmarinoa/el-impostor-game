@@ -183,12 +183,6 @@ const Game = () => {
       return;
     }
 
-    // Reiniciar jugadores
-    await supabase
-      .from("players")
-      .update({ is_eliminated: false })
-      .eq("room_id", room.id);
-
     // Seleccionar nuevos impostores aleatorios
     const newImpostorIds = [...players]
       .sort(() => Math.random() - 0.5)
