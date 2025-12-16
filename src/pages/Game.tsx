@@ -183,6 +183,12 @@ const Game = () => {
       return;
     }
 
+    // Reiniciar jugadores
+    await supabase
+      .from("players")
+      .update({ is_eliminated: false })
+      .eq("room_id", room.id);
+
     // Seleccionar nuevos impostores aleatorios
     const newImpostorIds = [...players]
       .sort(() => Math.random() - 0.5)
@@ -190,6 +196,15 @@ const Game = () => {
       .map((p) => p.id);
 
     await setPlayersAsImpostors(room.id, newImpostorIds);
+
+    // Actualizar la sala con la nueva frase y estado
+    await supabase
+      .from("rooms")
+      .update({
+        current_phrase_index: nextIndex,
+        status: RoomStatus.PLAYING,
+      })
+      .eq("id", room.id);
 
     setVoting(false);
     setHasVoted(false);
