@@ -131,6 +131,13 @@ const Game = () => {
       // Verificar si el más votado es un impostor
       const votedPlayer = activePlayers.find((p) => p.id === mostVoted);
       if (votedPlayer?.is_impostor) {
+        // Eliminar votos antes de pasar a la siguiente frase
+        await supabase
+          .from("votes")
+          .delete()
+          .eq("room_id", room.id)
+          .eq("round_number", roundNumber);
+
         toast({
           title: "¡Impostor eliminado!",
           description: "Los jugadores han ganado esta ronda",
@@ -154,6 +161,13 @@ const Game = () => {
           });
           nextPhrase();
         } else {
+          // Eliminar votos de la ronda actual antes de continuar
+          await supabase
+            .from("votes")
+            .delete()
+            .eq("room_id", room.id)
+            .eq("round_number", roundNumber);
+
           setVoting(false);
           setHasVoted(false);
           setSelectedVote(null);
