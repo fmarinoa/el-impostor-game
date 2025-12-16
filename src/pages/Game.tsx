@@ -63,7 +63,7 @@ const Game = () => {
   };
 
   const submitVote = async () => {
-    if (!selectedVote || !room || !currentPlayer || hasVoted) return;
+    if (!selectedVote || !room || !currentPlayer || hasVoted || currentPlayer.is_eliminated) return;
 
     try {
       const { error } = await supabase.from("votes").insert({
@@ -292,6 +292,14 @@ const Game = () => {
                 <p className="text-lg font-medium mb-2">Voto registrado</p>
                 <p className="text-muted-foreground">
                   Esperando a que todos voten...
+                </p>
+              </div>
+            ) : currentPlayer.is_eliminated ? (
+              <div className="text-center py-8">
+                <AlertTriangle className="h-16 w-16 text-destructive mx-auto mb-4" />
+                <p className="text-lg font-medium mb-2">Has sido eliminado</p>
+                <p className="text-muted-foreground">
+                  No puedes votar en esta ronda
                 </p>
               </div>
             ) : (
