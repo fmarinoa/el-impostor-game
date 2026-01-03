@@ -4,8 +4,10 @@
 name: Execute cleanup-old-data script
 
 on:
-  schedule:
-    - cron: "0 0 * * *" # At 00:00 UTC every day
+  workflow_dispatch:
+  # schedule:
+  #   - cron: "0 0 * * *" # At 00:00 UTC every day
+
 
 jobs:
   execute-script:
